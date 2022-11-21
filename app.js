@@ -9,6 +9,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('connect-flash');
 
+const methodOverride = require('method-override');
+
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
 app.use(expressLayouts);
@@ -26,6 +28,9 @@ app.use(
 );
 app.use(flash());
 
+app.use(methodOverride('_method'));
+
+// halaman root
 app.get('/', (req, res) => {
 	res.render('index', {
 		title: 'Halaman Home',
@@ -33,6 +38,7 @@ app.get('/', (req, res) => {
 	})
 });
 
+// halaman jadwal pelajaran
 app.get('/pelajaran', async (req, res) => {
 	const lessons = await Lesson.find();
 	res.render('pelajaran', {
@@ -43,14 +49,16 @@ app.get('/pelajaran', async (req, res) => {
 	})
 });
 
+// halaman tambah data pelajaran
 app.get('/add', (req, res) => {
 	res.render('add', {
 		title: 'Halaman Tambah Pelajaran',
 		layout: 'layouts/main-layout',
 		msg: req.flash('info')
 	})
-})
+});
 
+// proses tambah data pelajaran
 app.post('/add', (req, res) => {
 	const day = req.body.day;
 	const lessons = req.body.lessons;
@@ -67,12 +75,29 @@ app.post('/add', (req, res) => {
 		req.flash('info', 'Jadwal Pelajaran berhasil ditambahkan');
 		res.redirect('/pelajaran');
 	}
+});
 
+// halaman edit data pelajaran
+
+// proses delete data pelajaran
+app.delete('/pelajaran', async (req, res) => {
+	const lesson = await Lesson.findOne({_id: req.body._id});
+
+	if (!lesson) {
+        res.status(400);
+        res.send('<h1>404</h1>');
+    } else {
+        Lesson.deleteOne(lesson, (error, result) => {
+            // tambahkan flash message
+            req.flash('info', 'Data berhasil dihapus');
+            res.redirect('/pelajaran');
+        });
+    }
 })
 
 app.use('/', (req, res) => {
 	res.send('<h1>404</h1>')
-})
+});
 
 app.listen(port, () => {
 	console.log(`app listening on http://localhost:${port}`);
