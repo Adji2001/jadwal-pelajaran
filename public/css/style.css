@@ -1,3 +1,11 @@
 body {
 	background-color: #eef9fd;
 }
+.add {
+	width: 100px;
+	height: 100px;
+	margin-top: 30px;
+}
+.trash {
+	cursor: pointer;
+}

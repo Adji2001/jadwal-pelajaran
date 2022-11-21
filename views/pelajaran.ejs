@@ -2,13 +2,31 @@
 
 <hr />
 
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+  </symbol>
+</svg>
+<div class="row">
+	<div class="d-flex justify-content-center">
+		<div class=" text-center col-md-6">
+		<% if (msg.length !== 0 && msg == 'Jadwal Pelajaran berhasil ditambahkan') { %>
+		    <div class="alert alert-success alert-dismissible fade show" role="alert">
+			  <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+			  <%= msg %>
+			  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>
+		<% } %>
+		</div>
+	</div>
+</div>
 <div class="row">
 	<% lessons.forEach((lesson) => { %>
 	<div class="col-sm-4">
 		<div class="card text-white bg-primary mb-5" style="max-width: 18rem;">
 		  <div class="card-header">
 		  	<h5 class="card-title">
-		  		<a href="/kk" class="text-light" style="text-decoration: none;">
+		  		<a href="/change" class="text-light" style="text-decoration: none;">
 		  		<%= lesson.day %>
 		  		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
 				  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
@@ -27,4 +45,13 @@
 		</div>
 	</div>
 	<% }) %>
+	<div class="col-sm-4">
+		<a href="/add">
+		<button class="btn btn-primary add">
+			<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+			  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+			</svg>
+		</button>
+		</a>
+	</div>
 </div>
