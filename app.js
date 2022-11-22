@@ -3,6 +3,7 @@ const app = express();
 const port = 4000;
 const expressLayouts = require('express-ejs-layouts');
 const Lesson = require('./model/lesson.js');
+const Picket = require('./model/picket.js');
 require('./utils/db.js');
 
 const cookieParser = require('cookie-parser');
@@ -123,13 +124,49 @@ app.delete('/pelajaran', async (req, res) => {
     }
 });
 
+// #################################################################
+// #################################################################
+
 // Halaman jadwal piket
-app.get('/piket', (req, res) => {
+app.get('/piket', async (req, res) => {
+	const pickets = await Picket.find();
 	res.render('piket', {
 		title: 'Jadwal Piket',
 		layout: 'layouts/main-layout',
+		pickets,
+		msg: req.flash('info')
 	})
-})
+});
+
+// Halaman tambah jadwal piket
+app.get('/picket/add', async (req, res) => {
+	const picket = await Picket.findOne({_id: '637c9e78dfb2a0565ab11cce'})
+	res.render('addPicket', {
+		title: 'Tambah Jadwal Piket',
+		layout: 'layouts/main-layout',
+		picket,
+		msg: req.flash('info')
+	})
+});
+
+// proses tambah data piket
+app.post('/addPicket', (req, res) => {
+	const day = req.body.day;
+	const lessons = req.body.lessons;
+	const lesson = lessons.split(',');
+
+	if(day == 'Pilih Hari') {
+		req.flash('info', 'Silahkan pilih hari dulu');
+		res.redirect('/picket/add');
+	} else if(!lessons) {
+		req.flash('info', 'Tambahkan jadwal dulu');
+		res.redirect('/picket/add');
+	} else {
+		Picket.insertMany([{day, schedule: lesson}]);
+		req.flash('info', 'Jadwal Piket berhasil ditambahkan');
+		res.redirect('/piket');
+	}
+});
 
 app.use('/', (req, res) => {
 	res.send('<h1>404</h1>')
