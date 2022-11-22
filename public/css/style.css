@@ -9,3 +9,7 @@ body {
 .trash {
 	cursor: pointer;
 }
+.imgAdd>img {
+	max-width: 100%;
+	height: auto;
+}

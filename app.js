@@ -78,6 +78,34 @@ app.post('/add', (req, res) => {
 });
 
 // halaman edit data pelajaran
+app.get('/change/:_id', async (req, res) => {
+	const lesson = await Lesson.findOne({_id: req.params._id});
+	res.render('change', {
+		title: 'Edit Jadwal Pelajaran',
+		layout: 'layouts/main-layout',
+		msg: req.flash('info'),
+		lesson
+	})
+})
+
+// proses edit data pelajaran
+app.put('/change', (req, res) => {
+	const lesson = req.body.lessons;
+	const less = lesson.split(',');
+	Lesson.updateOne({_id: req.body._id}, 
+        {
+            $set: {
+                day: req.body.day,
+                lessons: less,
+            }
+        },
+        (error, result) => {
+            // tambahkan flash message
+            req.flash('info', 'Data berhasil diubah');
+            res.redirect('/pelajaran');
+        }
+    );
+});
 
 // proses delete data pelajaran
 app.delete('/pelajaran', async (req, res) => {
@@ -93,6 +121,14 @@ app.delete('/pelajaran', async (req, res) => {
             res.redirect('/pelajaran');
         });
     }
+});
+
+// Halaman jadwal piket
+app.get('/piket', (req, res) => {
+	res.render('piket', {
+		title: 'Jadwal Piket',
+		layout: 'layouts/main-layout',
+	})
 })
 
 app.use('/', (req, res) => {

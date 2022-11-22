@@ -1,7 +1,8 @@
 <div class="row">
 	<div class="col-md-6">
-		<h1 class="text-primary mt-3 mb-3">Tambah Jadwal Pelajaran</h1>
-		<form action="/add" method="post">
+		<h1 class="text-primary mt-3 mb-3">Edit Jadwal Pelajaran</h1>
+		<form method="post" action="/change?_method=PUT">
+			<input type="hidden" name="_id" value="<%= lesson._id %>">
 		  <div class="mb-3">
 		  	<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 			  <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -19,7 +20,7 @@
 				</div>
             <% } %>
 		    <select name="day" class="form-select" aria-label="Default select example">
-		    	<option selected>Pilih Hari</option>
+		    	<option value="<%= lesson.day %>"><%= lesson.day %></option>
 		    	<option value="Senin">Senin</option>
 		    	<option value="Selasa">Selasa</option>
 		    	<option value="Rabu">Rabu</option>
@@ -43,14 +44,17 @@
 			  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
 			  </svg></button>
 		  </div>
-		  <div id="showList">
+		<input type="hidden" value="<%= lesson.lessons %>" id="newLess">
+		  <div>
+			<ol id="showList" class="list-group list-group-numbered mb-4"></ol>
 		  </div>
 		  <input type="hidden"  name="lessons" id="lessons">
-		  <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+		  <button id="submit" type="submit" class="btn btn-success">Simpan Perubahan</button>
 		</form>
+
 	</div>
 	<div class="col-md-6 imgAdd">
-		<img src="img/add.png">
+		<img src="../img/change.png">
 	</div>
 </div>
 
@@ -59,9 +63,10 @@
 	const listText = document.getElementById('showList');
 	const lessons = document.getElementById('lessons');
 	const btnSubmit = document.getElementById('submit');
+	const newLess = document.getElementById('newLess').value;
+	const nyess = newLess.split(',');
 
-	listArr = [];
-	localStorage.setItem("data list", JSON.stringify(listArr));
+	localStorage.setItem("data list", JSON.stringify(nyess));
 
 	const ListArr = () => {
 		if(localStorage.getItem("data list") === null) {
@@ -72,6 +77,8 @@
 
 		return listArr;
 	}
+
+	lessons.value = ListArr();
 
 	const showDataArr = () => {
 		const listArr = ListArr();
@@ -97,7 +104,7 @@
 									Data jadwal masih kosong!
 								  </div>`
 		} else {
-			listText.innerHTML = `<ol class="list-group list-group-numbered mb-4">${newLiTag}</ol>`;
+			listText.innerHTML = newLiTag;
 		}
 
 		document.getElementById('inputan').value = "";
