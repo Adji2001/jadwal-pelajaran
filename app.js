@@ -196,6 +196,22 @@ app.put('/changePicket', (req, res) => {
     );
 });
 
+// proses delete data piket
+app.delete('/piket', async (req, res) => {
+	const lesson = await Picket.findOne({_id: req.body._id});
+
+	if (!lesson) {
+        res.status(400);
+        res.send('<h1>404</h1>');
+    } else {
+        Picket.deleteOne(lesson, (error, result) => {
+            // tambahkan flash message
+            req.flash('info', 'Data berhasil dihapus');
+            res.redirect('/piket');
+        });
+    }
+});
+
 app.use('/', (req, res) => {
 	res.send('<h1>404</h1>')
 });
