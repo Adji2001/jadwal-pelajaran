@@ -140,11 +140,9 @@ app.get('/piket', async (req, res) => {
 
 // Halaman tambah jadwal piket
 app.get('/picket/add', async (req, res) => {
-	const picket = await Picket.findOne({_id: '637c9e78dfb2a0565ab11cce'})
 	res.render('addPicket', {
 		title: 'Tambah Jadwal Piket',
 		layout: 'layouts/main-layout',
-		picket,
 		msg: req.flash('info')
 	})
 });
@@ -166,6 +164,36 @@ app.post('/addPicket', (req, res) => {
 		req.flash('info', 'Jadwal Piket berhasil ditambahkan');
 		res.redirect('/piket');
 	}
+});
+
+// Halaman edit jadwal piket
+app.get('/picket/change/:_id', async (req, res) => {
+	const picket = await Picket.findOne({_id: req.params._id});
+	res.render('changePicket', {
+		title: 'Edit Jadwal Piket',
+		layout: 'layouts/main-layout',
+		msg: req.flash('info'),
+		picket,
+	})
+});
+
+// Proses edit data piket
+app.put('/changePicket', (req, res) => {
+	const lesson = req.body.lessons;
+	const less = lesson.split(',');
+	Picket.updateOne({_id: req.body._id}, 
+        {
+            $set: {
+                day: req.body.day,
+                schedule: less,
+            }
+        },
+        (error, result) => {
+            // tambahkan flash message
+            req.flash('info', 'Data berhasil diubah');
+            res.redirect('/piket');
+        }
+    );
 });
 
 app.use('/', (req, res) => {
