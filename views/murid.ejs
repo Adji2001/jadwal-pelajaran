@@ -54,7 +54,7 @@
 		        </div>
 		      </div>
 		      <div class="modal-footer">
-		        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Edit</button>
+		        <a href="/murid/change/<%= student._id %>"><button type="button" class="btn btn-success" data-bs-dismiss="modal">Edit</button></a>
 		        <form action="/removeMurid?_method=DELETE" method="post">
 		        	<input type="hidden" name="_id" value="<%= student._id %>">
 		        	<button type="submit" class="btn btn-danger">Hapus</button>

@@ -281,16 +281,17 @@ app.post('/addMurid', (req, res, next) => {
 
 	    const fileNama = files.foto.originalFilename;
 	    const oldPath = files.foto.filepath;
-	    const ekstensiGambar = files.foto.mimetype.split('/');
-	    const newNama = `${files.foto.newFilename}.${ekstensiGambar[1]}`;
+	    const ekstensiGambar = fileNama.split('.');
+	    const indexing = ekstensiGambar.length - 1;
+	    const newNama = `${files.foto.newFilename}.${ekstensiGambar[indexing]}`;
 	    const newPath = __dirname + '/public/img/' + newNama;
 	    const sizeGambar = files.foto.size;
 
 	    // cek jika yg diupload bukan gambar
-	    if (!inArray(ekstensiGambar[1], ekstesiGambarValid)) {
+	    if (!inArray(ekstensiGambar[indexing], ekstesiGambarValid)) {
 	    	req.flash('info', 'yang anda masukkan bukan gambar');
 	    	res.redirect('/murid/add')
-	    } else if(sizeGambar > 5000000) {
+	    } else if(sizeGambar > 1000000) {
 	      req.flash('info', 'ukurannya besar');
 	      res.redirect('/murid/add')
 	    } else {
@@ -302,12 +303,118 @@ app.post('/addMurid', (req, res, next) => {
 		        res.redirect('/murid');
 		    });
 	    }
+	})
+});
 
-
+// Halaman edit data murid
+app.get('/murid/change/:_id', async (req, res) => {
+	const student = await Student.findOne({_id: req.params._id});
+	res.render('changeMurid', {
+		title: 'Halaman Edit Murid',
+		layout: 'layouts/main-layout',
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgChange: `${host}${port}/img/change.png`,
+		msg: req.flash('info'),
+		student,
+		image: `${host}${port}/img/`
 	})
 });
 
 // Proses edit data murid
+app.put('/changeMurid', async (req, res) => {
+	const student = await Student.findOne({_id: req.body._id});
+
+	const form = formidable({multiples: true});
+
+	form.parse(req, (err, fields, files) => {
+		const nama = fields.nama;
+		const quotes = fields.quotes;
+		const role = fields.role;
+		if (err) {
+	      next(err);
+	      return;
+	    }
+
+	    // method utk cek type gambar
+	    function inArray(needle, haystack) {
+	        var length = haystack.length;
+	        for(var i = 0; i < length; i++) {
+	            if(haystack[i] == needle) return true;
+	        }
+	        return false;
+	    }
+
+	    let ekstesiGambarValid = ['jpg', 'jpeg', 'png', 'JPEG', 'PNG'];
+
+	    const fileNama = files.foto.originalFilename;
+	    const oldPath = files.foto.filepath;
+	    const ekstensiGambar = fileNama.split('.');
+	    const indexing = ekstensiGambar.length - 1;
+	    const sizeGambar = files.foto.size;
+	    let newNama = `${files.foto.newFilename}.${ekstensiGambar[indexing]}`;
+	    const oldImage = fields.oldImage;
+
+	    
+	    // if (!inArray(ekstensiGambar[indexing], ekstesiGambarValid)) {
+	    // 	res.send('bukan gambar')
+	    // } else if(sizeGambar > 1000000) { 
+	    // 	res.send('besar')
+	    // } else {
+	    // 	res.send(newNama);
+	    // }
+
+	    if(files.foto.size < 1) {
+	    	Student.updateOne({_id: fields._id}, 
+		        {
+		            $set: {
+		                nama,
+		                quotes,
+		                role
+		            }
+		        },
+		        (error, result) => {
+		            // tambahkan flash message
+		            req.flash('info', 'Data berhasil diubah');
+		            res.redirect('/murid');
+		        }
+		    );
+	    } else {
+	    	newNama = `${files.foto.newFilename}.${ekstensiGambar[indexing]}`;
+	     const newPath = __dirname + '/public/img/' + newNama;
+
+	    	if (!inArray(ekstensiGambar[indexing], ekstesiGambarValid)) {
+		    	req.flash('info', 'bukan gambar');
+		      	res.redirect(`/murid/change/${fields._id}`)
+		    } else if(sizeGambar > 1000000) {
+			    req.flash('info', 'ukurannya besar');
+			    res.redirect(`/murid/change/${fields._id}`)
+		    } else {
+			    mv(oldPath, newPath, (err) => {
+			      if (err) { throw err; }
+			      Student.updateOne({_id: fields._id}, 
+				        {
+				            $set: {
+				                foto: newNama,
+				                nama,
+				                quotes,
+				                role
+				            }
+				        },
+				        (error, result) => {
+				        	fs.unlink(`${__dirname}/public/img/${oldImage}`, function(err) {
+
+						            req.flash('info', 'Data berhasil diubah');
+						            res.redirect('/murid');
+						    
+						    })
+				        }
+				    );
+			    });
+		    }
+	    }
+
+	})
+})
 
 // Proses delete data murid
 app.delete('/removeMurid', async (req, res) => {
