@@ -7,6 +7,7 @@ const Lesson = require('./model/lesson.js');
 const Picket = require('./model/picket.js');
 const Student = require('./model/student.js');
 require('./utils/db.js');
+const fs = require('fs');
 
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -304,6 +305,37 @@ app.post('/addMurid', (req, res, next) => {
 
 
 	})
+});
+
+// Proses edit data murid
+
+// Proses delete data murid
+app.delete('/removeMurid', async (req, res) => {
+	const student = await Student.findOne({_id: req.body._id});
+	const image = student.foto;
+
+	if (!student) {
+        res.status(400);
+        res.send('<h1>404</h1>');
+    } else {
+    	fs.unlink(`${__dirname}/public/img/${image}`, function(err) {
+		    if(err && err.code == 'ENOENT') {
+		        // file doens't exist
+		        req.flash('info', "File doesn't exist, won't remove it.");
+		        res.redirect('/murid');
+		    } else if (err) {
+		        // other errors, e.g. maybe we don't have enough permission
+		        req.flash('info', "Error occurred while trying to remove file");
+		        res.redirect('/murid');
+		    } else {
+		    	Student.deleteOne(student, (error, result) => {
+		            // tambahkan flash message
+		            req.flash('info', 'Data murid berhasil dihapus');
+		            res.redirect('/murid');
+		        });
+		    }
+		});
+    }
 })
 
 // #############################################################
