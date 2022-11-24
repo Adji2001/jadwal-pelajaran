@@ -1,9 +1,11 @@
+const host = 'http://localhost:'
 const express = require('express');
 const app = express();
 const port = 4000;
 const expressLayouts = require('express-ejs-layouts');
 const Lesson = require('./model/lesson.js');
 const Picket = require('./model/picket.js');
+const Student = require('./model/student.js');
 require('./utils/db.js');
 
 const cookieParser = require('cookie-parser');
@@ -11,6 +13,9 @@ const session = require('express-session');
 const flash = require('connect-flash');
 
 const methodOverride = require('method-override');
+
+const formidable = require('formidable');
+const mv = require('mv');
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({extended: true}));
@@ -36,6 +41,7 @@ app.get('/', (req, res) => {
 	res.render('index', {
 		title: 'Halaman Home',
 		layout: 'layouts/main-layout',
+		imgBrand: `${host}${port}/img/adji.jpg`
 	})
 });
 
@@ -46,7 +52,8 @@ app.get('/pelajaran', async (req, res) => {
 		title: 'Halaman jadwal pelajaran',
 		layout: 'layouts/main-layout',
 		lessons,
-		msg: req.flash('info')
+		msg: req.flash('info'),
+		imgBrand: `${host}${port}/img/adji.jpg`
 	})
 });
 
@@ -55,7 +62,9 @@ app.get('/add', (req, res) => {
 	res.render('add', {
 		title: 'Halaman Tambah Pelajaran',
 		layout: 'layouts/main-layout',
-		msg: req.flash('info')
+		msg: req.flash('info'),
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgSide: `${host}${port}/img/add.png`
 	})
 });
 
@@ -85,7 +94,9 @@ app.get('/change/:_id', async (req, res) => {
 		title: 'Edit Jadwal Pelajaran',
 		layout: 'layouts/main-layout',
 		msg: req.flash('info'),
-		lesson
+		lesson,
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgChange: `${host}${port}/img/change.png`
 	})
 })
 
@@ -134,7 +145,8 @@ app.get('/piket', async (req, res) => {
 		title: 'Jadwal Piket',
 		layout: 'layouts/main-layout',
 		pickets,
-		msg: req.flash('info')
+		msg: req.flash('info'),
+		imgBrand: `${host}${port}/img/adji.jpg`
 	})
 });
 
@@ -143,7 +155,9 @@ app.get('/picket/add', async (req, res) => {
 	res.render('addPicket', {
 		title: 'Tambah Jadwal Piket',
 		layout: 'layouts/main-layout',
-		msg: req.flash('info')
+		msg: req.flash('info'),
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgSide: `${host}${port}/img/add.png`
 	})
 });
 
@@ -174,6 +188,8 @@ app.get('/picket/change/:_id', async (req, res) => {
 		layout: 'layouts/main-layout',
 		msg: req.flash('info'),
 		picket,
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgChange: `${host}${port}/img/change.png`,
 	})
 });
 
@@ -212,10 +228,91 @@ app.delete('/piket', async (req, res) => {
     }
 });
 
+// ############################################################
+// ############################################################
+
+// Halaman murid
+app.get('/murid', async (req, res) => {
+	const students = await Student.find();
+	res.render('murid', {
+		title: 'Halaman Murid',
+		layout: 'layouts/main-layout',
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		students,
+		msg: req.flash('info')
+	})
+});
+
+// Halaman tambah murid
+app.get('/murid/add', async (req, res) => {
+	res.render('addMurid', {
+		title: 'Tambah Murid',
+		layout: 'layouts/main-layout',
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		msg: req.flash('info')
+	})
+});
+
+// Proses tambah murid
+app.post('/addMurid', (req, res, next) => {
+	const form = formidable({multiples: true});
+
+	form.parse(req, (err, fields, files) => {
+		const nama = fields.nama;
+		const quotes = fields.quotes;
+		const role = fields.role;
+		if (err) {
+	      next(err);
+	      return;
+	    }
+	    
+
+	    // method utk cek type gambar
+	    function inArray(needle, haystack) {
+	        var length = haystack.length;
+	        for(var i = 0; i < length; i++) {
+	            if(haystack[i] == needle) return true;
+	        }
+	        return false;
+	    }
+
+	    let ekstesiGambarValid = ['jpg', 'jpeg', 'png', 'JPEG', 'PNG'];
+
+	    const fileNama = files.foto.originalFilename;
+	    const oldPath = files.foto.filepath;
+	    const ekstensiGambar = files.foto.mimetype.split('/');
+	    const newNama = `${files.foto.newFilename}.${ekstensiGambar[1]}`;
+	    const newPath = __dirname + '/public/img/' + newNama;
+	    const sizeGambar = files.foto.size;
+
+	    // cek jika yg diupload bukan gambar
+	    if (!inArray(ekstensiGambar[1], ekstesiGambarValid)) {
+	    	req.flash('info', 'yang anda masukkan bukan gambar');
+	    	res.redirect('/murid/add')
+	    } else if(sizeGambar > 5000000) {
+	      req.flash('info', 'ukurannya besar');
+	      res.redirect('/murid/add')
+	    } else {
+		    mv(oldPath, newPath, (err) => {
+		      if (err) { throw err; }
+		      Student.insertMany([{foto: newNama, nama, quotes, role}])
+		      // tambahkan flash message
+		        req.flash('info', 'Data berhasil ditambah');
+		        res.redirect('/murid');
+		    });
+	    }
+
+
+	})
+})
+
+// #############################################################
+// #############################################################
+
 app.use('/', (req, res) => {
 	res.send('<h1>404</h1>')
 });
 
 app.listen(port, () => {
-	console.log(`app listening on http://localhost:${port}`);
+	console.log(`app listening on ${host}${port}`);
 });

@@ -13,3 +13,22 @@ body {
 	max-width: 100%;
 	height: auto;
 }
+.wrapper-foto {
+	border: 5px solid #ffffff;
+	width: 150px;
+	height: 150px;
+	overflow: hidden;
+	border-radius: 50%;
+	box-sizing: border-box;
+	background-position: center center;
+  	background-repeat: no-repeat;
+  	background-size: cover;
+}
+.cardBody:hover {
+	/* From https://css.glass */
+	background: rgba(255, 255, 255, 0.47);
+	border-radius: 16px;
+	box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+	backdrop-filter: blur(6.4px);
+	-webkit-backdrop-filter: blur(6.4px);
+}
