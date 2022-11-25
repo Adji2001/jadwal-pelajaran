@@ -38,11 +38,20 @@ app.use(flash());
 app.use(methodOverride('_method'));
 
 // halaman root
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+	const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu', 'Minggu'];
+	const newDay = new Date().getDay();
+	const thisDay = days[newDay - 1];
+
+	const lesson = await Lesson.find({day: thisDay});
+	const picket = await Picket.find({day: thisDay});
+
 	res.render('index', {
 		title: 'Halaman Home',
 		layout: 'layouts/main-layout',
-		imgBrand: `${host}${port}/img/adji.jpg`
+		imgBrand: `${host}${port}/img/adji.jpg`,
+		lesson,
+		picket
 	})
 });
 
@@ -250,6 +259,7 @@ app.get('/murid/add', async (req, res) => {
 		title: 'Tambah Murid',
 		layout: 'layouts/main-layout',
 		imgBrand: `${host}${port}/img/adji.jpg`,
+		imgSide: `${host}${port}/img/add.png`,
 		msg: req.flash('info')
 	})
 });
